@@ -1,0 +1,135 @@
+/* General Body Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa; /* Light gray background */
+    color: #343a40; /* Dark gray text */
+    line-height: 1.6;
+}
+
+/* Navbar specific styles if needed beyond Tailwind */
+nav {
+    border-bottom: 1px solid #e2e8f0; /* Subtle border */
+}
+
+/* Gallery Section Styles */
+.grid-cols-1.sm\:grid-cols-2.md\:grid-cols-3.lg\:grid-cols-4.gap-6 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid columns */
+    gap: 1.5rem; /* gap-6 */
+}
+
+/* Artwork Cards */
+.bg-white.rounded-lg.shadow.p-4 {
+    background-color: #ffffff;
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow */
+    padding: 1rem; /* p-4 */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.bg-white.rounded-lg.shadow.p-4:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+}
+
+.bg-white.rounded-lg.shadow.p-4 img {
+    width: 100%;
+    height: 12rem; /* h-48 */
+    object-fit: cover;
+    border-radius: 0.25rem; /* rounded */
+}
+
+.bg-white.rounded-lg.shadow.p-4 h3 {
+    margin-top: 1rem; /* mt-4 */
+    font-weight: 600; /* font-semibold */
+    font-size: 1.125rem; /* text-lg */
+    color: #2d3748; /* text-gray-800 */
+}
+
+.bg-white.rounded-lg.shadow.p-4 p {
+    font-size: 0.875rem; /* text-sm */
+    color: #6c757d; /* text-gray-500 */
+}
+
+.bg-white.rounded-lg.shadow.p-4 a.block {
+    margin-top: 0.5rem; /* mt-2 */
+    color: #4f46e5; /* text-indigo-600 */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    display: block;
+}
+
+/* Footer specific styles */
+footer {
+    margin-top: 100px; /* As per your initial style.css */
+    background-color: #1a202c; /* bg-gray-900 */
+    color: #ffffff; /* text-white */
+    padding-top: 2.5rem; /* py-10 */
+    padding-bottom: 2.5rem; /* py-10 */
+}
+
+footer .max-w-7xl.mx-auto.px-6.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid for footer columns */
+    gap: 2.5rem; /* gap-10 */
+}
+
+footer h3 {
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 600; /* font-semibold */
+    margin-bottom: 0.75rem; /* mb-3 */
+}
+
+footer ul {
+    list-style: none;
+    padding: 0;
+}
+
+footer ul li {
+    margin-bottom: 0.5rem; /* space-y-2 */
+}
+
+footer ul li a {
+    color: #a0aec0; /* text-gray-400 */
+    font-size: 0.875rem; /* text-sm */
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+footer ul li a:hover {
+    color: #ffffff; /* hover:text-white */
+}
+
+footer .border-t {
+    border-top-width: 1px;
+    border-color: #4a5568; /* border-gray-800 */
+}
+
+footer .text-center {
+    text-align: center;
+}
+
+footer .text-xs {
+    font-size: 0.75rem;
+}
+
+footer .text-gray-500 {
+    color: #a0aec0;
+}
+
+/* Responsive adjustments for mobile menu */
+@media (max-width: 767px) {
+  /* Ensure mobile menu is hidden by default and shown by JS */
+  .md\:flex {
+    display: none !important;
+  }
+  .md\:hidden {
+    display: flex !important; /* Show mobile menu button */
+  }
+  #mobile-menu {
+    display: none; /* Hidden by default, toggled by JS */
+  }
+  #mobile-menu.block {
+    display: block;
+  }
+}

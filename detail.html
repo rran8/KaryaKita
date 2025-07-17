@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Detail Karya - KaryaKita</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      height: 100%;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1 0 auto;
+    }
+    footer {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-indigo-700 text-white flex items-center justify-center rounded-full font-bold">K</div>
+      <h1 class="text-xl font-bold text-indigo-600">Detail Karya</h1>
+    </div>
+    <a href="index.html" class="text-indigo-600 hover:underline">← Kembali ke Galeri</a>
+  </nav>
+  <main class="max-w-2xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-xl border border-gray-200">
+    <div id="artwork-detail">
+      <p class="text-center text-gray-500">Memuat detail karya...</p>
+    </div>
+  </main>
+  <footer class="bg-gray-900 text-white py-10 mt-12">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="bg-white text-black rounded w-6 h-6 flex items-center justify-center font-bold text-sm">K</div>
+          <span class="font-bold text-lg">KaryaKita</span>
+        </div>
+        <p class="text-sm text-gray-400">Platform Galeri Karya Siswa</p>
+      </div>
+      <!-- Supported By Section -->
+      <div class="mt-8">
+        <h3 class="text-sm font-semibold mb-3">Supported By</h3>
+        <div class="flex items-center space-x-4">
+          <img src="assets/g1.png" alt="T'CARE Logo" class="h-12">
+          <img src="assets/g2.png" alt="Satuasa Peduli Bangsa Logo" class="h-10">
+          <img src="assets/g3.png" alt="MTT Majelis Telkomsel Taqwa Logo" class="h-6">
+        </div>
+      </div>
+    </div>
+      <div>
+        <h3 class="text-sm font-semibold mb-3">NAVIGASI</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="index.html" class="hover:text-white">Beranda</a></li>
+          <li><a href="tentang.html" class="hover:text-white">Tentang</a></li>
+          <li><a href="kontak.html" class="hover:text-white">Kontak</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold mb-3">KATEGORI</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li>Fotografi</li>
+          <li>Kerajinan</li>
+          <li>Seni Lukis</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold mb-3">KONTAK</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <span>info@karyakita.com</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <span>+62 123 4567 890</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-10 border-t border-gray-800 pt-4 text-center text-xs text-gray-500">
+      © 2023 KaryaKita. All rights reserved.
+    </div>
+  </footer>
+  <script>
+    // Ambil ID dari URL
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    async function loadArtworkDetail() {
+      const id = getQueryParam('id');
+      const container = document.getElementById('artwork-detail');
+      if (!id) {
+        container.innerHTML = '<p class="text-center text-red-500">ID karya tidak ditemukan.</p>';
+        return;
+      }
+      try {
+        const response = await fetch('api/get_artwork_detail.php?id=' + id);
+        const data = await response.json();
+        if (data.success) {
+          const a = data.artwork;
+          container.innerHTML = `
+            <h2 class="text-2xl font-bold mb-2">${a.title}</h2>
+            <p class="text-gray-600 mb-2">Oleh <span class="font-semibold">${a.student_name}</span> | Kategori: <span class="font-semibold">${a.category_name}</span></p>
+            <div class="mb-4">
+              ${a.media_type === 'image' ? `<img src="${a.media_url}" alt="${a.title}" class="w-full rounded shadow mb-2" />` : ''}
+              ${a.media_type === 'pdf' ? `<a href="${a.media_url}" target="_blank" class="text-indigo-600 underline">Lihat PDF</a>` : ''}
+              ${a.media_type === 'youtube_link' ? `<iframe width="100%" height="315" src="${a.media_url.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>` : ''}
+            </div>
+            <div class="prose max-w-none mb-4">${a.description}</div>
+            <p class="text-sm text-gray-400">Status: ${a.status} | Diunggah: ${a.created_at || a.upload_date || '-'}</p>
+          `;
+        } else {
+          container.innerHTML = `<p class="text-center text-red-500">${data.message}</p>`;
+        }
+      } catch (error) {
+        container.innerHTML = `<p class="text-center text-red-500">Gagal memuat detail karya: ${error.message}</p>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadArtworkDetail);
+  </script>
+</body>
+</html>

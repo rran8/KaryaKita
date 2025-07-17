@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaryaKita - Unggah Karya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+  <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navbar for Upload Page -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-indigo-700 text-white flex items-center justify-center rounded-full font-bold">K</div>
+      <h1 class="text-xl font-bold text-indigo-600">Unggah Karya</h1>
+    </div>
+    <a href="index.html" class="text-indigo-600 hover:underline">← Kembali ke Beranda</a>
+  </nav>
+
+  <!-- Main Content - Upload Form -->
+  <main class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-xl border border-gray-200">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Formulir Unggah Karya</h2>
+    <form id="projectForm" class="space-y-4">
+      <div>
+        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Judul Karya</label>
+        <input type="text" id="title" placeholder="Judul Karya Anda" class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" required />
+      </div>
+
+      <div>
+        <label for="student_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Siswa</label>
+        <input type="text" id="student_name" placeholder="Nama Lengkap Anda" class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" required />
+      </div>
+
+      <div>
+        <label for="student_class" class="block text-sm font-medium text-gray-700 mb-1">Kelas/Angkatan (Opsional)</label>
+        <input type="text" id="student_class" placeholder="Contoh: XII IPA 1 / Angkatan 2023" class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" />
+      </div>
+
+      <div>
+        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+        <select id="category" class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" required>
+          <option value="">Pilih Kategori</option>
+          <!-- Categories will be dynamically loaded here -->
+        </select>
+      </div>
+
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Karya</label>
+        <textarea id="description" name="description" placeholder="Jelaskan karya Anda secara singkat..." class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" rows="4"></textarea>
+      </div>
+
+      <div>
+        <label for="media_file" class="block text-sm font-medium text-gray-700 mb-1">Unggah File Media (Gambar/PDF)</label>
+        <input type="file" id="media_file" accept="image/*,application/pdf" class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" />
+        <p class="mt-1 text-xs text-gray-500">Ukuran file maksimal: 10MB untuk gambar, 100MB untuk PDF. (Simulasi: akan menggunakan URL placeholder)</p>
+      </div>
+
+      <div>
+        <label for="youtube_link" class="block text-sm font-medium text-gray-700 mb-1">Atau Link YouTube (Opsional)</label>
+        <input type="url" id="youtube_link" placeholder="Contoh: https://www.youtube.com/watch?v=..." class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm" />
+        <p class="mt-1 text-xs text-gray-500">Jika karya berupa video, masukkan link YouTube.</p>
+      </div>
+
+      <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition duration-300 font-semibold shadow-md">Unggah Karya</button>
+    </form>
+  </main>
+
+  <!-- Custom Modal for Messages -->
+  <div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+      <p id="modalMessage" class="text-lg font-semibold text-gray-800 mb-4"></p>
+      <button id="closeModal" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-10 mt-12">
+     <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+    
+    <!-- Logo dan Deskripsi -->
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <div class="bg-white text-black rounded w-6 h-6 flex items-center justify-center font-bold text-sm">K</div>
+        <span class="font-bold text-lg">KaryaKita</span>
+      </div>
+      <p class="text-sm text-gray-400">Platform Galeri Karya Siswa</p>
+    </div>
+
+    <!-- Supported By Section -->
+      <div class="mt-8">
+        <h3 class="text-sm font-semibold mb-3">Supported By</h3>
+        <div class="flex items-center space-x-4">
+          <img src="assets/g1.png" alt="T'CARE Logo" class="h-12">
+          <img src="assets/g2.png" alt="Satuasa Peduli Bangsa Logo" class="h-10">
+          <img src="assets/g3.png" alt="MTT Majelis Telkomsel Taqwa Logo" class="h-6">
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigasi -->
+    <div>
+      <h3 class="text-sm font-semibold mb-3">NAVIGASI</h3>
+      <ul class="space-y-2 text-sm text-gray-400">
+        <li><a href="index.html" class="hover:text-white">Beranda</a></li>
+        <li><a href="#" class="hover:text-white">Galeri</a></li>
+        <li><a href="#" class="hover:text-white">Tentang</a></li>
+      </ul>
+    </div>
+
+    <!-- Kategori -->
+    <div id="footer-categories">
+      <h3 class="text-sm font-semibold mb-3">KATEGORI</h3>
+      <ul class="space-y-2 text-sm text-gray-400">
+        <!-- Categories will be dynamically loaded here -->
+      </ul>
+    </div>
+
+    <!-- Kontak -->
+    <div>
+      <h3 class="text-sm font-semibold mb-3">KONTAK</h3>
+      <ul class="space-y-2 text-sm text-gray-400">
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5"
+               viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75M21.75 6.75L12 13.5 2.25 6.75" />
+          </svg>
+          <span>info@karyakita.com</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5"
+               viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 6.75v10.5A2.25 2.25 0 004.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75M4.5 4.5h15A2.25 2.25 0 0121.75 6.75v10.5A2.25 2.25 0 0119.5 19.5h-15A2.25 2.25 0 012.25 17.25V6.75A2.25 2.25 0 014.5 4.5z" />
+          </svg>
+          <span>+62 123 4567 890</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="mt-10 border-t border-gray-800 pt-4 text-center text-xs text-gray-500">
+    © 2023 KaryaKita. All rights reserved.
+  </div>
+</footer>
+
+  <!-- Scripts -->
+  <script>
+    // Fungsi untuk menampilkan pesan modal kustom
+    function showMessage(message) {
+      document.getElementById('modalMessage').innerText = message;
+      document.getElementById('messageModal').classList.remove('hidden');
+    }
+
+    // Event listener tombol tutup modal
+    document.getElementById('closeModal').addEventListener('click', function() {
+      document.getElementById('messageModal').classList.add('hidden');
+    });
+
+    // Fungsi untuk memuat kategori ke dropdown select dan footer
+    async function loadCategoriesIntoFormAndFooter() {
+        const categorySelect = document.getElementById('category');
+        const footerCategoriesContainer = document.querySelector('#footer-categories ul');
+
+        try {
+            const response = await fetch('api/get_categories.php');
+            const data = await response.json();
+
+            if (data.success) {
+                const categories = data.categories;
+                // Bersihkan opsi yang ada
+                categorySelect.innerHTML = '<option value="">Pilih Kategori</option>';
+                footerCategoriesContainer.innerHTML = '';
+
+                categories.forEach(cat => {
+                    // Tambahkan ke select form
+                    const option = document.createElement('option');
+                    option.value = cat.slug;
+                    option.innerText = cat.name;
+                    categorySelect.appendChild(option);
+
+                    // Tambahkan ke kategori footer
+                    const footerLi = document.createElement('li');
+                    const footerLink = document.createElement('a');
+                    footerLink.href = `category.html?slug=${cat.slug}`;
+                    footerLink.className = 'hover:text-white';
+                    footerLink.innerText = cat.name;
+                    footerLi.appendChild(footerLink);
+                    footerCategoriesContainer.appendChild(footerLi);
+                });
+            } else {
+                console.error("Gagal memuat kategori:", data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }
+
+    document.getElementById("projectForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const title = document.getElementById("title").value;
+      const student_name = document.getElementById("student_name").value;
+      const student_class = document.getElementById("student_class").value;
+      const category_slug = document.getElementById("category").value;
+      const description = CKEDITOR.instances.description ? CKEDITOR.instances.description.getData() : '';
+      const mediaFile = document.getElementById("media_file").files[0];
+      const youtubeLink = document.getElementById("youtube_link").value;
+
+      let media_type = '';
+      let media_url = '';
+
+      if (mediaFile) {
+        media_type = mediaFile.type.startsWith('image') ? 'image' : 'pdf';
+      } else if (youtubeLink) {
+        media_type = 'youtube_link';
+        media_url = youtubeLink;
+      } else {
+        showMessage("Mohon unggah file media atau masukkan link YouTube.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('student_name', student_name);
+      formData.append('student_class', student_class);
+      formData.append('category_slug', category_slug);
+      formData.append('description', description);
+      formData.append('media_type', media_type);
+
+      if (mediaFile) {
+        formData.append('media_file', mediaFile);
+      }
+      if (media_type === 'youtube_link') {
+        formData.append('media_url', media_url);
+      }
+
+      try {
+        const response = await fetch('api/add_artwork.php', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage("✅ Karya berhasil diajukan!");
+          document.getElementById("projectForm").reset();
+          CKEDITOR.instances.description.setData('');
+        } else {
+          showMessage(`Gagal mengunggah karya: ${data.message}`);
+        }
+      } catch (e) {
+        showMessage(`Terjadi kesalahan saat mengunggah karya: ${e.message}`);
+      }
+    });
+
+    // Muat konten saat DOM selesai dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCategoriesIntoFormAndFooter();
+      CKEDITOR.replace('description'); // Inisialisasi CKEditor pada textarea
+    });
+  </script>
+</body>
+</html>

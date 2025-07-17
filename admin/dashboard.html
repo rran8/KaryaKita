@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KaryaKita - Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: #fff; margin: auto; padding: 20px; border-radius: 0.5rem; width: 90%; max-width: 500px; box-shadow: 0 4px 24px rgba(0,0,0,0.2);}
+    .close-button { float: right; font-size: 1.5rem; font-weight: bold; color: #aaa; cursor: pointer;}
+    .close-button:hover { color: #333; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-indigo-700 text-white flex items-center justify-center rounded-full font-bold">K</div>
+      <h1 class="text-xl font-bold text-indigo-600">Admin Dashboard</h1>
+    </div>
+    <div class="flex items-center space-x-4">
+      <span id="adminUsername" class="font-medium text-gray-700"></span>
+      <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl flex-1 w-full">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Selamat Datang, <span id="dashboardUsername">Admin!</span></h2>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-200 mb-8">
+      <button class="px-4 py-2 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 focus:outline-none" onclick="showSection('artworks', event)">Kelola Karya</button>
+      <button class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:border-gray-300 focus:outline-none" onclick="showSection('categories', event)">Kelola Kategori</button>
+    </div>
+
+    <!-- Section: Kelola Karya -->
+    <section id="artworks-section" class="dashboard-section">
+      <div class="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+        <input type="text" id="artworkSearch" placeholder="Cari judul atau nama siswa..." class="w-full sm:w-1/2 p-2 border border-gray-300 rounded-md shadow-sm">
+        <select id="artworkStatusFilter" class="w-full sm:w-auto p-2 border border-gray-300 rounded-md shadow-sm">
+          <option value="all">Semua Status</option>
+          <option value="pending">Tertunda</option>
+          <option value="published">Dipublish</option>
+          <option value="declined">Ditolak</option>
+        </select>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+          <thead>
+            <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              <th class="py-3 px-4 border-b">ID</th>
+              <th class="py-3 px-4 border-b">Judul</th>
+              <th class="py-3 px-4 border-b">Siswa</th>
+              <th class="py-3 px-4 border-b">Kategori</th>
+              <th class="py-3 px-4 border-b">Status</th>
+              <th class="py-3 px-4 border-b">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="artworksTableBody" class="text-gray-700 text-sm">
+            <tr><td colspan="6" class="text-center py-4">Memuat karya...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section: Kelola Kategori -->
+    <section id="categories-section" class="dashboard-section hidden">
+      <div class="mb-6 flex flex-col sm:flex-row gap-4">
+        <input type="text" id="newCategoryName" placeholder="Nama Kategori Baru" class="flex-grow p-2 border border-gray-300 rounded-md shadow-sm">
+        <button id="addCategoryBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300 font-semibold shadow-md">Tambah Kategori</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+          <thead>
+            <tr class="bg-gray-100 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">
+              <th class="py-3 px-4 border-b">ID</th>
+              <th class="py-3 px-4 border-b">Nama Kategori</th>
+              <th class="py-3 px-4 border-b">Slug</th>
+              <th class="py-3 px-4 border-b">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTableBody" class="text-gray-700 text-sm">
+            <tr><td colspan="4" class="text-center py-4">Memuat kategori...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Edit Karya -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeEditModal()">&times;</span>
+      <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Edit Karya</h3>
+      <form id="editForm" class="space-y-4">
+        <input type="hidden" id="edit_id">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Judul Karya</label>
+          <input type="text" id="edit_title" class="w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nama Siswa</label>
+          <input type="text" id="edit_student_name" class="w-full p-2 border border-gray-300 rounded-md" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Kelas/Angkatan</label>
+          <input type="text" id="edit_student_class" class="w-full p-2 border border-gray-300 rounded-md">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+          <select id="edit_category_slug" class="w-full p-2 border border-gray-300 rounded-md" required></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+          <textarea id="edit_description" class="w-full p-2 border border-gray-300 rounded-md" rows="4"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700">Simpan Perubahan</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Pesan -->
+  <div id="messageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+      <p id="modalMessage" class="text-lg font-semibold text-gray-800 mb-4"></p>
+      <button id="closeModal" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-10 mt-12">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="bg-white text-black rounded w-6 h-6 flex items-center justify-center font-bold text-sm">K</div>
+          <span class="font-bold text-lg">KaryaKita</span>
+        </div>
+        <p class="text-sm text-gray-400">Platform Galeri Karya Siswa</p>
+      </div>
+      
+      <div>
+        <h3 class="text-sm font-semibold mb-3">NAVIGASI</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="../index.html" class="hover:text-white">Beranda</a></li>
+          <li><a href="#" class="hover:text-white">Galeri</a></li>
+          <li><a href="#" class="hover:text-white">Tentang</a></li>
+        </ul>
+      </div>
+      <div id="footer-categories">
+        <h3 class="text-sm font-semibold mb-3">KATEGORI</h3>
+        <ul class="space-y-2 text-sm text-gray-400"></ul>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold mb-3">KONTAK</h3>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li class="flex items-center gap-2">
+            <span>info@karyakita.com</span>
+          </li>
+          <li class="flex items-center gap-2">
+            <span>+62 123 4567 890</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-10 border-t border-gray-800 pt-4 text-center text-xs text-gray-500">
+      © 2023 KaryaKita. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // --- Modal Message ---
+    const messageModal = document.getElementById("messageModal");
+    const modalMessage = document.getElementById("modalMessage");
+    const closeModalBtn = document.getElementById("closeModal");
+    function showCustomModal(message) {
+      modalMessage.textContent = message;
+      messageModal.classList.remove("hidden");
+    }
+    closeModalBtn.onclick = function() { messageModal.classList.add("hidden"); };
+    window.onclick = function(event) {
+      if (event.target == messageModal) messageModal.classList.add("hidden");
+      if (event.target.classList && event.target.classList.contains('modal')) event.target.classList.remove('active');
+    }
+
+    // --- Tab Switch ---
+    function showSection(sectionId, event) {
+      document.querySelectorAll('.dashboard-section').forEach(section => section.classList.add('hidden'));
+      document.getElementById(sectionId + '-section').classList.remove('hidden');
+      document.querySelectorAll('.flex.border-b button').forEach(button => {
+        button.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+        button.classList.add('text-gray-600', 'hover:text-gray-900', 'hover:border-gray-300');
+      });
+      if(event) {
+        event.target.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+        event.target.classList.remove('text-gray-600', 'hover:text-gray-900', 'hover:border-gray-300');
+      }
+    }
+
+    // --- Admin Session ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      const loggedInUser = sessionStorage.getItem('loggedInUser');
+      if (!loggedInUser || JSON.parse(loggedInUser).role !== 'admin') {
+        showCustomModal("Anda tidak memiliki akses ke halaman ini. Silakan login sebagai admin.");
+        setTimeout(() => { window.location.href = "login.html"; }, 2000);
+        return;
+      }
+      const username = JSON.parse(loggedInUser).username;
+      document.getElementById('adminUsername').textContent = username;
+      document.getElementById('dashboardUsername').textContent = username;
+      loadCategoriesIntoFooter();
+      loadArtworks();
+      loadCategoriesForAdmin();
+    });
+
+    // --- Logout ---
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('loggedInUser');
+      window.location.href = "login.html";
+    });
+
+    // --- Artworks Table ---
+    async function loadArtworks() {
+      const tbody = document.getElementById('artworksTableBody');
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Memuat karya...</td></tr>';
+      try {
+        const res = await fetch('../api/admin_api.php?action=get_all_artworks');
+        const data = await res.json();
+        tbody.innerHTML = '';
+        if (data.success && data.artworks.length > 0) {
+          let filtered = data.artworks;
+          const searchTerm = document.getElementById('artworkSearch').value.toLowerCase();
+          const statusFilter = document.getElementById('artworkStatusFilter').value;
+          if (searchTerm) {
+            filtered = filtered.filter(a =>
+              a.title.toLowerCase().includes(searchTerm) ||
+              a.student_name.toLowerCase().includes(searchTerm)
+            );
+          }
+          if (statusFilter !== 'all') {
+            filtered = filtered.filter(a => a.status === statusFilter);
+          }
+          if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Tidak ada karya ditemukan.</td></tr>';
+            return;
+          }
+          filtered.forEach(a => {
+            let badge = '';
+            if (a.status === 'published') badge = '<span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Published</span>';
+            else if (a.status === 'pending') badge = '<span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Pending</span>';
+            else badge = '<span class="px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Declined</span>';
+
+            const row = tbody.insertRow();
+            row.className = 'border-b border-gray-200 hover:bg-gray-50';
+            row.innerHTML = `
+              <td class="py-3 px-4">${a.id}</td>
+              <td class="py-3 px-4">${a.title}</td>
+              <td class="py-3 px-4">${a.student_name}</td>
+              <td class="py-3 px-4">${a.category_name}</td>
+              <td class="py-3 px-4">${badge}</td>
+              <td class="py-3 px-4 space-x-2">
+                <button onclick="openEditModal(${a.id})" class="text-blue-600 hover:text-blue-900 text-lg" title="Edit"><i class="fas fa-edit"></i></button>
+                ${a.status === 'pending' ? `<button onclick="updateArtworkStatus(${a.id}, 'published')" class="text-green-600 hover:text-green-900 text-lg" title="Setujui"><i class="fas fa-check-circle"></i></button>` : ''}
+                ${a.status === 'pending' ? `<button onclick="updateArtworkStatus(${a.id}, 'declined')" class="text-yellow-600 hover:text-yellow-900 text-lg" title="Tolak"><i class="fas fa-times-circle"></i></button>` : ''}
+                <button onclick="deleteArtwork(${a.id})" class="text-red-600 hover:text-red-900 text-lg" title="Hapus"><i class="fas fa-trash"></i></button>
+              </td>
+            `;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Tidak ada karya yang tersedia.</td></tr>';
+        }
+      } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-red-500">Gagal memuat karya: ${error.message}</td></tr>`;
+      }
+    }
+    document.getElementById('artworkSearch').addEventListener('keyup', loadArtworks);
+    document.getElementById('artworkStatusFilter').addEventListener('change', loadArtworks);
+
+    async function updateArtworkStatus(id, status) {
+      const formData = new FormData();
+      formData.append('id', id);
+      formData.append('status', status);
+      try {
+        const response = await fetch('../api/update_artwork_status.php', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        if (result.success) {
+          showCustomModal("✅ Status karya berhasil diubah.");
+          loadArtworks();
+        } else {
+          showCustomModal("❌ " + result.message);
+        }
+      } catch (error) {
+        showCustomModal("Terjadi kesalahan saat memperbarui status karya.");
+      }
+    }
+
+    async function deleteArtwork(id) {
+      if (!confirm("Apakah Anda yakin ingin menghapus karya ini?")) return;
+      const formData = new FormData();
+      formData.append('id', id);
+      try {
+        const response = await fetch('../api/delete_artwork.php', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        if (result.success) {
+          showCustomModal("✅ Karya berhasil dihapus.");
+          loadArtworks();
+        } else {
+          showCustomModal("❌ " + result.message);
+        }
+      } catch (error) {
+        showCustomModal("Terjadi kesalahan saat menghapus karya.");
+      }
+    }
+
+    // --- Modal Edit Karya ---
+    const editModal = document.getElementById('editModal');
+    const editForm = document.getElementById('editForm');
+    function openEditModal(id) {
+      fetch(`../api/get_artwork_detail.php?id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            const a = data.artwork;
+            document.getElementById('edit_id').value = a.id;
+            document.getElementById('edit_title').value = a.title;
+            document.getElementById('edit_student_name').value = a.student_name;
+            document.getElementById('edit_student_class').value = a.student_class;
+            document.getElementById('edit_description').value = a.description;
+            // Load kategori
+            fetch('../api/get_categories.php').then(r=>r.json()).then(catData=>{
+              const select = document.getElementById('edit_category_slug');
+              select.innerHTML = '';
+              catData.categories.forEach(cat=>{
+                const opt = document.createElement('option');
+                opt.value = cat.slug;
+                opt.innerText = cat.name;
+                if (cat.slug === a.category_slug) opt.selected = true;
+                select.appendChild(opt);
+              });
+              editModal.classList.add('active');
+            });
+          } else {
+            showCustomModal("Gagal memuat data karya.");
+          }
+        });
+    }
+    function closeEditModal() { editModal.classList.remove('active'); }
+    editForm.onsubmit = async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit_id').value;
+      const title = document.getElementById('edit_title').value;
+      const student_name = document.getElementById('edit_student_name').value;
+      const student_class = document.getElementById('edit_student_class').value;
+      const category_slug = document.getElementById('edit_category_slug').value;
+      const description = document.getElementById('edit_description').value;
+      const res = await fetch('../api/edit_artwork.php', {
+        method: 'POST',
+        body: new URLSearchParams({id, title, student_name, student_class, category_slug, description})
+      });
+      const data = await res.json();
+      if (data.success) {
+        showCustomModal('Karya berhasil diedit!');
+        closeEditModal();
+        loadArtworks();
+      } else {
+        showCustomModal('Gagal edit: ' + data.message);
+      }
+    };
+
+    // --- Kategori ---
+    async function loadCategoriesForAdmin() {
+      const categoriesTableBody = document.getElementById('categoriesTableBody');
+      categoriesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Memuat kategori...</td></tr>';
+      try {
+        const response = await fetch('../api/admin_api.php?action=get_all_categories');
+        const data = await response.json();
+        categoriesTableBody.innerHTML = '';
+        if (data.success && data.categories.length > 0) {
+          data.categories.forEach(category => {
+            const row = categoriesTableBody.insertRow();
+            row.className = 'border-b border-gray-200 hover:bg-gray-50';
+            row.innerHTML = `
+              <td class="py-3 px-4">${category.id}</td>
+              <td class="py-3 px-4">${category.name}</td>
+              <td class="py-3 px-4">${category.slug}</td>
+              <td class="py-3 px-4">
+                <button onclick="deleteCategory(${category.id})" class="text-red-600 hover:text-red-900 text-lg" title="Hapus"><i class="fas fa-trash"></i></button>
+              </td>
+            `;
+          });
+        } else {
+          categoriesTableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4">Tidak ada kategori yang tersedia.</td></tr>';
+        }
+      } catch (error) {
+        categoriesTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500">Gagal memuat kategori: ${error.message}</td></tr>`;
+      }
+    }
+    document.getElementById('addCategoryBtn').addEventListener('click', async () => {
+      const newCategoryNameInput = document.getElementById('newCategoryName');
+      const categoryName = newCategoryNameInput.value.trim();
+      if (!categoryName) { showCustomModal("Nama kategori tidak boleh kosong."); return; }
+      const formData = new FormData();
+      formData.append('action', 'add_category');
+      formData.append('name', categoryName);
+      const addButton = document.getElementById('addCategoryBtn');
+      addButton.disabled = true; addButton.textContent = 'Menambahkan...';
+      try {
+        const response = await fetch('../api/admin_api.php', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+          showCustomModal("✅ " + result.message);
+          newCategoryNameInput.value = '';
+          loadCategoriesForAdmin();
+        } else {
+          showCustomModal("❌ " + result.message);
+        }
+      } catch (error) {
+        showCustomModal("Terjadi kesalahan saat menambahkan kategori.");
+      } finally {
+        addButton.disabled = false; addButton.textContent = 'Tambah Kategori';
+      }
+    });
+    async function deleteCategory(id) {
+      if (!confirm("Apakah Anda yakin ingin menghapus kategori ini?")) return;
+      const formData = new FormData();
+      formData.append('action', 'delete_category');
+      formData.append('id', id);
+      try {
+        const response = await fetch('../api/admin_api.php', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (result.success) {
+          showCustomModal("✅ " + result.message);
+          loadCategoriesForAdmin();
+          loadArtworks();
+        } else {
+          showCustomModal("❌ " + result.message);
+        }
+      } catch (error) {
+        showCustomModal("Terjadi kesalahan saat menghapus kategori.");
+      }
+    }
+
+    // --- Footer Kategori ---
+    async function loadCategoriesIntoFooter() {
+      const footerCategoriesContainer = document.querySelector('#footer-categories ul');
+      try {
+        const response = await fetch('../api/get_categories.php');
+        const data = await response.json();
+        if (data.success) {
+          footerCategoriesContainer.innerHTML = '';
+          data.categories.forEach(cat => {
+            const footerLi = document.createElement('li');
+            const footerLink = document.createElement('a');
+            footerLink.href = `category.html?slug=${cat.slug}`;
+            footerLink.className = 'hover:text-white';
+            footerLink.innerText = cat.name;
+            footerLi.appendChild(footerLink);
+            footerCategoriesContainer.appendChild(footerLi);
+          });
+        }
+      } catch (error) {}
+    }
+  </script>
+</body>
+</html>
